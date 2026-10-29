@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>备婚清单</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3eee4;
+      --card: #fffdf8;
+      --ink: #24312a;
+      --muted: #6b726c;
+      --line: #e4d9c6;
+      --green: #1b3329;
+      --gold: #8c6d32;
+      --brass: #c6a15a;
+      --soon: #f3e6c8;
+      --late: #f6e4df;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    button, input, textarea { font: inherit; }
+    input, textarea { color: var(--ink); }
+    button { cursor: pointer; }
+    ::selection { background: #e7d7b0; }
+
+    :focus-visible {
+      outline: 2px solid var(--brass);
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px 20px 72px;
+    }
+
+    .mast {
+      background: var(--green);
+      color: #f6f1e6;
+      border-radius: 20px;
+      padding: 26px 26px 22px;
+    }
+
+    .kicker {
+      margin: 0 0 12px;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      color: #e6d3a4;
+    }
+
+    .who {
+      margin: 0 0 4px;
+      font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+
+    h1, h2, h3, .who, .stats strong {
+      font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+      font-weight: 400;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(40px, 6vw, 52px);
+      line-height: 1.05;
+      letter-spacing: 0.08em;
+    }
+
+    .deck {
+      margin: 10px 0 0;
+      max-width: 36em;
+      color: rgba(246, 241, 230, 0.82);
+    }
+
+    .progress {
+      margin-top: 18px;
+      height: 4px;
+      background: rgba(246, 241, 230, 0.16);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: #e6d3a4;
+      border-radius: inherit;
+      transition: width 0.25s ease;
+    }
+
+    .progress-label {
+      margin: 8px 0 0;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: rgba(246, 241, 230, 0.72);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .meta label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: rgba(246, 241, 230, 0.62);
+    }
+
+    .mast input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(230, 211, 164, 0.45);
+      border-radius: 0;
+      color: #f6f1e6;
+      padding: 6px 0;
+    }
+
+    .mast input::placeholder { color: rgba(246, 241, 230, 0.4); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 14px 0 0;
+      padding: 0;
+    }
+
+    .stats li {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 12px 10px;
+      list-style: none;
+      min-width: 0;
+    }
+
+    .stats strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stats span {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 22px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 8px 16px;
+      border: 1px solid transparent;
+    }
+
+    .btn.gold {
+      background: var(--brass);
+      color: var(--green);
+      border-color: var(--brass);
+    }
+
+    .btn.gold:hover { background: #b8924c; }
+
+    .btn.line {
+      background: transparent;
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .btn.line:hover {
+      background: var(--green);
+      color: #f6f1e6;
+    }
+
+    .chapters {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .chapter {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .rail { position: relative; min-height: 100%; }
+
+    .rail::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 31px;
+      bottom: -45px;
+      width: 1px;
+      background: #ddd4c4;
+    }
+
+    .chapter:last-child .rail::before { display: none; }
+
+    .dot {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 11px;
+      height: 11px;
+      margin-top: 26px;
+      border-radius: 50%;
+      background: var(--paper);
+      border: 2px solid var(--green);
+      box-sizing: border-box;
+    }
+
+    .chapter.is-complete .dot { background: var(--green); }
+    .chapter.is-urgent .dot { background: var(--brass); border-color: var(--brass); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 20px 14px;
+      min-width: 0;
+    }
+
+    .chapter.is-urgent .card { border-left: 3px solid var(--brass); }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .when {
+      margin: 0;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+    }
+
+    .num {
+      margin-right: 8px;
+      font-variant-numeric: tabular-nums;
+      color: var(--brass);
+    }
+
+    .card h2 {
+      margin: 2px 0 0;
+      font-size: 28px;
+      line-height: 1.25;
+      letter-spacing: 0.02em;
+      overflow-wrap: anywhere;
+    }
+
+    .chapter.is-complete .card h2 { color: var(--muted); }
+
+    .card-side {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex: none;
+    }
+
+    .count {
+      font-size: 13px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .badge {
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .badge.is-soon { background: var(--soon); color: #6d5420; }
+    .badge.is-late { background: var(--late); color: #8a3b32; }
+    .badge.is-month,
+    .badge.is-next { background: #e6efe8; color: var(--green); }
+    .badge.is-done { background: #eeeae2; color: var(--muted); }
+
+    .lead {
+      margin: 8px 0 2px;
+      color: #5c6560;
+      font-size: 14.5px;
+    }
+
+    .empty {
+      margin: 12px 0 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr) auto;
+      gap: 6px 10px;
+      align-items: start;
+      padding: 12px 0;
+      border-top: 1px solid #efe6d6;
+    }
+
+    .task input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 2px 0 0;
+      accent-color: var(--green);
+    }
+
+    .title {
+      overflow-wrap: anywhere;
+      cursor: pointer;
+      padding-top: 1px;
+    }
+
+    .task.is-done .title {
+      color: #8d928c;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+
+    textarea.note {
+      grid-column: 1 / -1;
+      width: calc(100% - 30px);
+      margin-left: 30px;
+      border: none;
+      border-bottom: 1px solid #e6dccb;
+      border-radius: 0;
+      background: transparent;
+      padding: 2px 0 6px;
+      line-height: 1.45;
+      resize: none;
+      overflow: hidden;
+      min-height: 28px;
+      overflow-wrap: anywhere;
+    }
+
+    textarea.note::placeholder { color: #a39e93; }
+
+    .del-task {
+      border: none;
+      background: none;
+      color: #a39e93;
+      font-size: 12px;
+      padding: 2px 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .task:hover .del-task,
+    .task:focus-within .del-task {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .add-task {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .add-task input {
+      flex: 1;
+      min-width: 0;
+      border: 1px dashed #ddcfb6;
+      background: transparent;
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+
+    .add-task button {
+      border: none;
+      background: #f3ead6;
+      color: var(--green);
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+
+    .add-task button:hover { background: #eadcba; }
+
+    .del-cat {
+      margin-top: 8px;
+    }
+
+    .text-btn {
+      background: none;
+      border: none;
+      color: #8a5a52;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-size: 13px;
+    }
+
+    .new-cat {
+      margin-top: 16px;
+      padding: 16px 18px 18px;
+      border: 1px dashed #d9cdb6;
+      border-radius: 16px;
+    }
+
+    .new-cat h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 8px;
+    }
+
+    .new-cat input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+
+    .task-field { grid-column: 1 / -1; }
+
+    .new-cat .btn { margin-top: 10px; }
+
+    #sheet {
+      margin-top: 28px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 24px 10px;
+    }
+
+    .sheet-top h2 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .sheet-sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .sheet-meta {
+      margin: 14px 0 0;
+      font-size: 14px;
+    }
+
+    #sheet h3 {
+      margin: 18px 0 6px;
+      font-size: 18px;
+      overflow-wrap: anywhere;
+    }
+
+    #sheet h3 span {
+      margin-left: 8px;
+      font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+    }
+
+    #sheet ul {
+      list-style: none;
+      margin: 0;
+      padding: 0 0 4px;
+    }
+
+    #sheet li {
+      padding: 7px 0;
+      border-top: 1px solid #f0e8d8;
+    }
+
+    .box {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 8px;
+      border: 1.5px solid var(--green);
+      vertical-align: -1px;
+      box-sizing: border-box;
+    }
+
+    li.done .box { background: var(--green); }
+
+    .sum-note {
+      display: block;
+      margin: 2px 0 0 22px;
+      color: #6d5420;
+      overflow-wrap: anywhere;
+    }
+
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      margin-top: 22px;
+      color: #8a8478;
+      font-size: 13px;
+    }
+
+    .foot p { margin: 0; }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 16px 14px 56px; }
+      .mast { padding: 20px 18px 18px; }
+      .meta, .stats, .fields { grid-template-columns: 1fr 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .card h2 { font-size: 24px; }
+      .foot { flex-direction: column; align-items: flex-start; }
+      .fields { grid-template-columns: 1fr; }
+    }
+
+    @media (hover: none) {
+      .del-task { opacity: 1; pointer-events: auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .progress span { transition: none; }
+    }
+
+    @media print {
+      body { background: white; }
+      .wrap { max-width: none; padding: 0; }
+      .no-print, #chapters, .new-cat { display: none !important; }
+      .mast, #sheet, #sheet article { break-inside: avoid; }
+      .mast, #sheet {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="mast">
+      <p class="kicker" id="today"></p>
+      <p class="who" id="who" hidden></p>
+      <h1>备婚</h1>
+      <p class="deck" id="status-line"></p>
+      <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-label="完成进度">
+        <span id="bar"></span>
+      </div>
+      <p class="progress-label" id="progress-label"></p>
+      <div class="meta">
+        <label>两个人
+          <input id="names" placeholder="可不填" autocomplete="off" spellcheck="false">
+        </label>
+        <label>目标婚期
+          <input id="season" placeholder="例如 2027 年春" autocomplete="off" spellcheck="false">
+        </label>
+      </div>
+    </header>
+
+    <ul class="stats">
+      <li><strong id="stat-open">0</strong><span>还没做</span></li>
+      <li><strong id="stat-month">0</strong><span>这个月</span></li>
+      <li><strong id="stat-notes">0</strong><span>写下的结论</span></li>
+      <li><strong id="stat-cats">0</strong><span>分类</span></li>
+    </ul>
+
+    <div class="toolbar no-print">
+      <button type="button" class="btn gold" id="copy">复制汇总</button>
+      <button type="button" class="btn line" id="print" title="打印窗口里可以存成 PDF">打印</button>
+      <span id="copy-status" class="sr-only" aria-live="polite"></span>
+    </div>
+
+    <section aria-labelledby="list-title">
+      <h2 id="list-title" class="sr-only">分类清单</h2>
+      <ol id="chapters" class="chapters"></ol>
+    </section>
+
+    <form id="new-cat" class="new-cat no-print">
+      <h2>再加一个分类</h2>
+      <div class="fields">
+        <input name="title" placeholder="分类，例如婚纱照" required aria-label="分类名称" autocomplete="off" spellcheck="false">
+        <input name="when" placeholder="时间，例如 1月" aria-label="时间" autocomplete="off" spellcheck="false">
+        <input class="task-field" name="task" placeholder="第一件要做的事，可以空着" aria-label="第一件要做的事" autocomplete="off" spellcheck="false">
+      </div>
+      <button type="submit" class="btn line">加上</button>
+    </form>
+
+    <section id="sheet" aria-labelledby="sheet-title">
+      <div class="sheet-top">
+        <h2 id="sheet-title">安排汇总</h2>
+        <p class="sheet-sub">勾过的事，和每件事情下的结论。</p>
+      </div>
+      <div id="summary-body"></div>
+    </section>
+
+    <footer class="foot no-print">
+      <p>勾选和备注保存在这台浏览器里。清掉这个站点的数据，或换一个浏览器，就看不到了。</p>
+      <button type="button" class="text-btn" id="reset">恢复初始清单</button>
+    </footer>
+  </div>
+
+  <script>
+    const KEY = "wedding-checklist-v1";
+
+    const BADGE_CLASS = {
+      "已完成": "is-done",
+      "时间过了": "is-late",
+      "快到月底": "is-soon",
+      "这个月": "is-month",
+      "先做这个": "is-next"
+    };
+
+    function seed() {
+      return {
+        meta: { names: "王书记 & 徐总", season: "" },
+        categories: [
+          {
+            id: "checkup",
+            title: "婚检",
+            when: "10月末",
+            month: 10,
+            late: true,
+            planYear: 2026,
+            lead: "这个月底前做完。",
+            tasks: [
+              { id: "checkup-1", title: "完成婚检", note: "", done: false, ph: "医院、日期、报告是否已拿" }
+            ]
+          },
+          {
+            id: "gift",
+            title: "彩礼、嫁妆",
+            when: "11月",
+            month: 11,
+            late: false,
+            planYear: 2026,
+            lead: "金额、嫁妆、房产加名和家里财权，11 月谈清楚。",
+            tasks: [
+              { id: "gift-1", title: "商量彩礼金额", note: "", done: false, ph: "金额、怎么给、什么时候给" },
+              { id: "gift-2", title: "商量嫁妆", note: "", done: false, ph: "内容、是否过户" },
+              { id: "gift-3", title: "房产加名", note: "", done: false, ph: "哪套房、何时办" },
+              { id: "gift-4", title: "家里财权", note: "", done: false, ph: "谁来管、怎么定" }
+            ]
+          },
+          {
+            id: "engage",
+            title: "订婚宴，商量婚期",
+            when: "12月",
+            month: 12,
+            late: false,
+            planYear: 2026,
+            lead: "双方父母见见面。大致敲定结婚的年份和季节，以两边亲人的时间为主。",
+            tasks: [
+              { id: "engage-1", title: "订婚宴", note: "", done: false, ph: "日期、地点、形式" },
+              { id: "engage-2", title: "双方父母见面", note: "", done: false, ph: "时间、地点" },
+              { id: "engage-3", title: "大致敲定结婚的年份 / 季节", note: "", done: false, ph: "例如 2027 年春天" },
+              { id: "engage-4", title: "看双方家庭亲人时间为主", note: "", done: false, ph: "谁哪几个月不方便" }
+            ]
+          },
+          {
+            id: "license",
+            title: "领证",
+            when: "12月",
+            month: 12,
+            late: false,
+            planYear: 2026,
+            lead: "12 月把证领了。",
+            tasks: [
+              { id: "license-1", title: "领证", note: "", done: false, ph: "民政局、日期、要带的材料" }
+            ]
+          },
+          {
+            id: "wedding",
+            title: "婚礼安排",
+            when: "待定",
+            month: null,
+            late: false,
+            planYear: null,
+            lead: "城市、规模、酒店、人数和桌数，先记下大概。",
+            tasks: [
+              { id: "wedding-1", title: "婚礼举办城市", note: "", done: false, ph: "双方的城市，或另一个城市" },
+              { id: "wedding-2", title: "规模", note: "", done: false, ph: "家里人小聚，或更大" },
+              { id: "wedding-3", title: "酒店", note: "", done: false, ph: "候选酒店、预算" },
+              { id: "wedding-4", title: "宾客大概人数", note: "", done: false, ph: "例如 80 人" },
+              { id: "wedding-5", title: "桌数", note: "", done: false, ph: "例如 8 桌" }
+            ]
+          }
+        ]
+      };
+    }
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[ch]));
+    }
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 9);
+    }
+
+    function normalize(data) {
+      if (!data || !Array.isArray(data.categories)) return seed();
+      data.meta = data.meta || {};
+      data.meta.names = data.meta.names || "王书记 & 徐总";
+      data.meta.season = data.meta.season || "";
+      data.categories.forEach((cat) => {
+        cat.tasks = Array.isArray(cat.tasks) ? cat.tasks : [];
+        cat.lead = cat.lead || "";
+        cat.when = cat.when || "未定时间";
+        cat.tasks.forEach((task) => {
+          task.note = task.note || "";
+          task.done = !!task.done;
+          task.ph = task.ph || "写下结论";
+          task.title = task.title || "未命名";
+        });
+      });
+      return data;
+    }
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return seed();
+        return normalize(JSON.parse(raw));
+      } catch (err) {
+        return seed();
+      }
+    }
+
+    let state = load();
+
+    function save() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+      } catch (err) {
+        /* private mode: keep the list in memory */
+      }
+    }
+
+    function nowParts(now) {
+      return {
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+        day: now.getDate()
+      };
+    }
+
+    function isOverdue(cat, now) {
+      if (!cat.month || !cat.planYear) return false;
+      const parts = nowParts(now);
+      if (parts.year > cat.planYear) return true;
+      if (parts.year < cat.planYear) return false;
+      return parts.month > cat.month;
+    }
+
+    function isThisMonth(cat, now) {
+      if (!cat.month || !cat.planYear) return false;
+      const parts = nowParts(now);
+      return parts.year === cat.planYear && parts.month === cat.month;
+    }
+
+    function badgeText(cat) {
+      const tasks = cat.tasks || [];
+      if (tasks.length > 0 && tasks.every((task) => task.done)) return "已完成";
+      if (tasks.length === 0) return "";
+      const now = new Date();
+      if (isOverdue(cat, now)) return "时间过了";
+      if (isThisMonth(cat, now) && cat.late && now.getDate() >= 25) return "快到月底";
+      if (isThisMonth(cat, now)) return "这个月";
+      const first = state.categories.find((item) => item.tasks.some((task) => !task.done));
+      if (first && first.id === cat.id) return "先做这个";
+      return "";
+    }
+
+    function countText(cat) {
+      const done = cat.tasks.filter((task) => task.done).length;
+      return `${done}/${cat.tasks.length}`;
+    }
+
+    function totals() {
+      let total = 0;
+      let done = 0;
+      let notes = 0;
+      let monthOpen = 0;
+      const now = new Date();
+      state.categories.forEach((cat) => {
+        cat.tasks.forEach((task) => {
+          total += 1;
+          if (task.done) done += 1;
+          if (task.note.trim()) notes += 1;
+          if (!task.done && isThisMonth(cat, now)) monthOpen += 1;
+        });
+      });
+      return { total, done, notes, monthOpen, open: total - done };
+    }
+
+    function statusText() {
+      const open = [];
+      state.categories.forEach((cat) => {
+        cat.tasks.forEach((task) => {
+          if (!task.done) open.push({ cat, task });
+        });
+      });
+      const { total } = totals();
+      if (total === 0) return "还没有事项。下面可以再加一个分类。";
+      if (open.length === 0) return "清单上的事都勾完了。";
+      const first = open[0];
+      const badge = badgeText(first.cat);
+      if (badge === "快到月底") return `${first.cat.when}了，先把${first.cat.title}做完。`;
+      if (badge === "时间过了") return `「${first.cat.title}」已经过了原先的时间，还没勾完。`;
+      return `接下来：${first.cat.title} · ${first.task.title}`;
+    }
+
+    function autosize(el) {
+      el.style.height = "auto";
+      el.style.height = Math.max(el.scrollHeight, 28) + "px";
+    }
+
+    function taskHTML(cat, task) {
+      const tick = "tick-" + task.id;
+      return `
+        <div class="task${task.done ? " is-done" : ""}" data-task="${esc(task.id)}" data-cat="${esc(cat.id)}">
+          <input id="${esc(tick)}" type="checkbox"${task.done ? " checked" : ""}>
+          <label class="title" for="${esc(tick)}">${esc(task.title)}</label>
+          <button type="button" class="del-task" data-del-task="${esc(task.id)}">删除</button>
+          <textarea class="note" rows="1" aria-label="记下：${esc(task.title)}" placeholder="${esc(task.ph)}" spellcheck="false">${esc(task.note)}</textarea>
+        </div>
+      `;
+    }
+
+    function chapterHTML(cat, index) {
+      const tasks = cat.tasks.map((task) => taskHTML(cat, task)).join("");
+      const body = cat.tasks.length
+        ? tasks
+        : `<p class="empty">还没有事。下面可以加。</p>`;
+      const del = cat.custom
+        ? `<button type="button" class="text-btn del-cat" data-del-cat="${esc(cat.id)}">删除这个分类</button>`
+        : "";
+      const num = String(index + 1).padStart(2, "0");
+      return `
+        <li class="chapter" data-cat="${esc(cat.id)}">
+          <div class="rail" aria-hidden="true"><span class="dot"></span></div>
+          <article class="card">
+            <header class="card-head">
+              <div>
+                <p class="when"><span class="num">${num}</span>${esc(cat.when)}</p>
+                <h2>${esc(cat.title)}</h2>
+              </div>
+              <div class="card-side">
+                <span class="badge" data-badge hidden></span>
+                <span class="count" data-count>${countText(cat)}</span>
+              </div>
+            </header>
+            ${cat.lead ? `<p class="lead">${esc(cat.lead)}</p>` : ""}
+            ${body}
+            <form class="add-task" data-add="${esc(cat.id)}">
+              <input name="title" placeholder="加一件事" aria-label="给${esc(cat.title)}加一件事" autocomplete="off" spellcheck="false">
+              <button type="submit">添加</button>
+            </form>
+            ${del}
+          </article>
+        </li>
+      `;
+    }
+
+    function renderList() {
+      const root = document.getElementById("chapters");
+      root.innerHTML = state.categories.map(chapterHTML).join("");
+      root.querySelectorAll("textarea.note").forEach(autosize);
+      paint();
+    }
+
+    function paintCard(cat) {
+      const chapter = document.querySelector(`.chapter[data-cat="${CSS.escape(cat.id)}"]`);
+      if (!chapter) return;
+      const badge = badgeText(cat);
+      const badgeEl = chapter.querySelector("[data-badge]");
+      badgeEl.hidden = !badge;
+      badgeEl.textContent = badge;
+      badgeEl.className = "badge" + (badge ? ` ${BADGE_CLASS[badge] || ""}` : "");
+      chapter.querySelector("[data-count]").textContent = countText(cat);
+      const allDone = cat.tasks.length > 0 && cat.tasks.every((task) => task.done);
+      chapter.classList.toggle("is-complete", allDone);
+      chapter.classList.toggle("is-urgent", badge === "快到月底" || badge === "时间过了");
+    }
+
+    function paint() {
+      const now = new Date();
+      document.getElementById("today").textContent =
+        `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+      const names = state.meta.names.trim();
+      const who = document.getElementById("who");
+      who.textContent = names;
+      who.hidden = !names;
+      document.title = names ? `${names} · 备婚清单` : "备婚清单";
+      document.getElementById("status-line").textContent = statusText();
+
+      const numbers = totals();
+      document.getElementById("stat-open").textContent = String(numbers.open);
+      document.getElementById("stat-month").textContent = String(numbers.monthOpen);
+      document.getElementById("stat-notes").textContent = String(numbers.notes);
+      document.getElementById("stat-cats").textContent = String(state.categories.length);
+
+      const progress = document.getElementById("progress");
+      progress.setAttribute("aria-valuemax", String(numbers.total));
+      progress.setAttribute("aria-valuenow", String(numbers.done));
+      const pct = numbers.total ? Math.round((numbers.done / numbers.total) * 100) : 0;
+      document.getElementById("bar").style.width = pct + "%";
+      document.getElementById("progress-label").textContent =
+        numbers.total ? `已完成 ${numbers.done} / ${numbers.total}` : "还没有事项";
+
+      state.categories.forEach(paintCard);
+      renderSummary();
+    }
+
+    function summaryText() {
+      const lines = ["备婚清单"];
+      const names = state.meta.names.trim();
+      const season = state.meta.season.trim();
+      if (names) lines.push(`两个人：${names}`);
+      if (season) lines.push(`目标婚期：${season}`);
+      lines.push("");
+      state.categories.forEach((cat) => {
+        lines.push(`${cat.title}（${cat.when}）`);
+        if (!cat.tasks.length) lines.push("（还没有事）");
+        cat.tasks.forEach((task) => {
+          const mark = task.done ? "☑" : "☐";
+          const note = task.note.trim();
+          lines.push(note ? `${mark} ${task.title} — ${note}` : `${mark} ${task.title}`);
+        });
+        lines.push("");
+      });
+      return lines.join("\n").trim() + "\n";
+    }
+
+    function renderSummary() {
+      const names = state.meta.names.trim();
+      const season = state.meta.season.trim();
+      const meta = [
+        names ? `<p class="sheet-meta">两个人：${esc(names)}</p>` : "",
+        season ? `<p class="sheet-meta">目标婚期：${esc(season)}</p>` : ""
+      ].join("");
+      const blocks = state.categories.map((cat) => {
+        const items = cat.tasks.length
+          ? cat.tasks.map((task) => {
+              const note = task.note.trim();
+              return `<li class="${task.done ? "done" : ""}"><span class="box" aria-hidden="true"></span><span class="sum-title">${esc(task.title)}</span>${note ? `<span class="sum-note">${esc(note)}</span>` : ""}</li>`;
+            }).join("")
+          : `<li><span class="sum-title">还没有事</span></li>`;
+        return `<article><h3>${esc(cat.title)}<span>${esc(cat.when)}</span></h3><ul>${items}</ul></article>`;
+      }).join("");
+      document.getElementById("summary-body").innerHTML = meta + blocks;
+    }
+
+    function rowOf(node) {
+      return node.closest(".task");
+    }
+
+    function pairFrom(row) {
+      if (!row) return null;
+      const cat = state.categories.find((item) => item.id === row.dataset.cat);
+      if (!cat) return null;
+      const task = cat.tasks.find((item) => item.id === row.dataset.task);
+      if (!task) return null;
+      return { cat, task };
+    }
+
+    function onToggle(input) {
+      const found = pairFrom(rowOf(input));
+      if (!found) return;
+      found.task.done = input.checked;
+      rowOf(input).classList.toggle("is-done", found.task.done);
+      save();
+      paint();
+    }
+
+    function onNote(area) {
+      const found = pairFrom(rowOf(area));
+      if (!found) return;
+      found.task.note = area.value;
+      autosize(area);
+      save();
+      paint();
+    }
+
+    function onMeta() {
+      state.meta.names = document.getElementById("names").value;
+      state.meta.season = document.getElementById("season").value;
+      save();
+      paint();
+    }
+
+    function parseWhen(text) {
+      const when = text.trim() || "未定时间";
+      const match = when.match(/(\d{1,2})\s*月/);
+      let month = null;
+      if (match) {
+        const n = Number(match[1]);
+        if (n >= 1 && n <= 12) month = n;
+      }
+      return {
+        when,
+        month,
+        late: /月末|月底/.test(when),
+        planYear: month ? new Date().getFullYear() : null
+      };
+    }
+
+    document.getElementById("names").value = state.meta.names;
+    document.getElementById("season").value = state.meta.season;
+
+    document.addEventListener("change", (event) => {
+      if (event.target.matches('.task input[type="checkbox"]')) onToggle(event.target);
+    });
+
+    document.addEventListener("input", (event) => {
+      if (event.target.matches("textarea.note")) onNote(event.target);
+      if (event.target.id === "names" || event.target.id === "season") onMeta();
+    });
+
+    document.addEventListener("submit", (event) => {
+      const form = event.target;
+      if (form.matches(".add-task")) {
+        event.preventDefault();
+        const title = form.title.value.trim();
+        if (!title) return;
+        const cat = state.categories.find((item) => item.id === form.dataset.add);
+        if (!cat) return;
+        cat.tasks.push({ id: "task-" + uid(), title, note: "", done: false, ph: "写下结论" });
+        save();
+        renderList();
+        const input = document.querySelector(`.add-task[data-add="${CSS.escape(cat.id)}"] input`);
+        if (input) input.focus();
+        return;
+      }
+      if (form.id === "new-cat") {
+        event.preventDefault();
+        const title = form.title.value.trim();
+        if (!title) return;
+        const timing = parseWhen(form.when.value);
+        const first = form.task.value.trim();
+        const cat = {
+          id: "cat-" + uid(),
+          title,
+          when: timing.when,
+          month: timing.month,
+          late: timing.late,
+          planYear: timing.planYear,
+          lead: "",
+          custom: true,
+          tasks: first ? [{ id: "task-" + uid(), title: first, note: "", done: false, ph: "写下结论" }] : []
+        };
+        state.categories.push(cat);
+        save();
+        form.reset();
+        renderList();
+        const card = document.querySelector(`.chapter[data-cat="${CSS.escape(cat.id)}"]`);
+        if (card) card.scrollIntoView({ block: "nearest" });
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const delTask = event.target.closest("[data-del-task]");
+      if (delTask) {
+        const row = delTask.closest(".task");
+        const found = pairFrom(row);
+        if (!found) return;
+        if (!window.confirm(`删除「${found.task.title}」？`)) return;
+        found.cat.tasks = found.cat.tasks.filter((task) => task.id !== found.task.id);
+        save();
+        renderList();
+        return;
+      }
+      const delCat = event.target.closest("[data-del-cat]");
+      if (delCat) {
+        const cat = state.categories.find((item) => item.id === delCat.dataset.delCat);
+        if (!cat) return;
+        if (!window.confirm(`删除分类「${cat.title}」？里面的勾选和备注会一起去掉。`)) return;
+        state.categories = state.categories.filter((item) => item.id !== cat.id);
+        save();
+        renderList();
+      }
+    });
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      const text = summaryText();
+      const status = document.getElementById("copy-status");
+      const button = document.getElementById("copy");
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (err) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        const ok = document.execCommand("copy");
+        area.remove();
+        if (!ok) {
+          status.textContent = "没有复制成功，可以用打印。";
+          return;
+        }
+      }
+      button.textContent = "已复制";
+      status.textContent = "已复制到剪贴板。";
+      window.setTimeout(() => {
+        button.textContent = "复制汇总";
+      }, 1600);
+    });
+
+    document.getElementById("print").addEventListener("click", () => window.print());
+
+    document.getElementById("reset").addEventListener("click", () => {
+      if (!window.confirm("恢复初始清单？现在写下的勾选和备注会清掉。")) return;
+      state = seed();
+      try { localStorage.removeItem(KEY); } catch (err) { /* ignore */ }
+      document.getElementById("names").value = state.meta.names;
+      document.getElementById("season").value = state.meta.season;
+      renderList();
+    });
+
+    renderList();
+  </script>
+</body>
+</html>
